@@ -1,22 +1,26 @@
 <script lang="ts">
     import {Peer} from 'peerjs'
-    const peer = new Peer();
-    let coPeerId: string = ""
-    let videoCurrent: HTMLMediaElement;
-    let videoEl: HTMLMediaElement;
-    let myId = ""
-    
+	  import { onMount } from 'svelte';
+	  import { writable, type Writable } from 'svelte/store';
+    const peer: Writable<Peer> = writable(new Peer());
+    let coPeerId = writable("")
+    let myId = writable("")
+    let videoCurrent: HTMLMediaElement
+    let videoEl: HTMLMediaElement
+
+    onMount(() => {
+  
       // GET YOU ID
-      peer.on("open",(id)=>{
-        myId = id
+      $peer.on("open",(id)=>{
+        $myId = id
         console.log(id)
       })
       // IF ERROR CAN GET ID
-       peer.on("error",(id)=>{
+       $peer.on("error",(id)=>{
         console.log("error id "+ id)
       })
     
-      peer.on("connection",(conn)=>{
+      $peer.on("connection",(conn)=>{
         console.log("message....")
         conn.on("data",(data)=>{
           console.log("new data " + data)
@@ -27,7 +31,7 @@
       })
     
       // HANDLE CONNECTTION
-      peer.on("call",async(call)=>{
+      $peer.on("call",async(call)=>{
         // open webcam
       await navigator.mediaDevices.getUserMedia({
         video:true,
@@ -39,23 +43,11 @@
         videoCurrent.play()
       }).catch(err=>console.log("err msg" + err))
     })
-    // RENDER YOU WEBCAM HERE
-    let renderYouwebcam = (stream: MediaStream)=>{
-      console.log(stream)
-      videoEl.srcObject = stream
-      videoEl.play()
-    }
-    
-    </script>
-    <div>
-      you id cam  = {myId}
-      <br>
-      code : <input type=""
-      bind:value={coPeerId} name="">
-      <!-- BUTTON CONNECT TO FRIEND -->
-      <button
-      on:click={async()=>{
-        var conn = peer.connect(coPeerId)
+    })
+
+    const connectToPeer = async () => {
+      console.log("connect")
+        const conn = $peer.connect($coPeerId)
         conn.on("data",(data)=>{
           console.log("new data " + data)
         })
@@ -67,12 +59,29 @@
           video:true,
           audio:true
         }).then(stream=>{
-          let call = peer.call(coPeerId,stream)
+          let call = $peer.call($coPeerId,stream)
           videoCurrent.srcObject = stream
           videoCurrent.play()
           call.on("stream",renderYouwebcam)
         }).catch(err=>console.log("have error " + err))
-      }}
+    }
+
+    // RENDER YOU WEBCAM HERE
+    const renderYouwebcam = (stream: MediaStream)=>{
+      console.log(stream)
+      videoEl.srcObject = stream
+      videoEl.play()
+    }
+    </script>
+    <div>
+      <p>Your peer id: {$myId}</p>
+      <br>
+      <label for="coPeerId">Enter your co-peer ID: </label>
+      <input id="coPeerId" type="text"
+      bind:value={$coPeerId}>
+      <!-- BUTTON CONNECT TO FRIEND -->
+      <button
+      on:click={connectToPeer}
       >
       connect</button>
     
