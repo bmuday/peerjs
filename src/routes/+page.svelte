@@ -1,32 +1,30 @@
 <script lang="ts">
-	import { connectToPeer, listenToEvents } from "$lib/hooks";
+	import { connectToPeer, listenToEvents, sendMessage } from "$lib/hooks";
 	import { onMount } from "svelte";
 	import { writable, type Writable } from "svelte/store";
-  import { coPeerId, myId, videoCurrent, videoEl, conn } from "$lib/stores";
+  import { coPeerId, videoCurrent, videoEl, conn, myPeer, messages } from "$lib/stores";
 
   const newMessage = writable("")
-  const messages: Writable<string[]> = writable([])
 
-  $: console.log("connection", $conn)
+  $: {
+    console.log("connection", $conn)
+  }
 
     onMount(() => {
-    listenToEvents()
+    listenToEvents($videoCurrent)
     })
-
-    const sendMessage = () => {
-      console.log("new message", $newMessage)
-      $conn.send($newMessage)
-    }
     </script>
     <div>
-      <p>Your peer id: {$myId}</p>
+      {#if $myPeer && $myPeer.id}
+        <p>Your peer id: {$myPeer.id}</p>
+      {/if}
       <br>
       <label for="coPeerId">Enter your co-peer ID: </label>
       <input id="coPeerId" type="text"
       bind:value={$coPeerId}>
       <!-- BUTTON CONNECT TO FRIEND -->
       <button
-      on:click={connectToPeer}
+      on:click={() => connectToPeer($myPeer, $coPeerId, $videoCurrent)}
       >
       connect</button>
     
@@ -45,7 +43,10 @@
         <track kind="captions" src="">
       </video>
 
-      <form>
+      <form on:submit={() => {
+        sendMessage($newMessage)
+        $newMessage = ""
+      }}>
         <input bind:value={$newMessage} type="text" placeholder="Enter your new message">
         <button type="submit">Send</button>
       </form>
