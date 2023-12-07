@@ -2,8 +2,8 @@
     import {Peer} from 'peerjs'
     const peer = new Peer();
     let coPeerId: string = ""
-    let videoCurrent
-    let videoEl;
+    let videoCurrent: HTMLMediaElement;
+    let videoEl: HTMLMediaElement;
     let myId = ""
     
       // GET YOU ID
@@ -40,7 +40,7 @@
       }).catch(err=>console.log("err msg" + err))
     })
     // RENDER YOU WEBCAM HERE
-    let renderYouwebcam = (stream)=>{
+    let renderYouwebcam = (stream: MediaStream)=>{
       console.log(stream)
       videoEl.srcObject = stream
       videoEl.play()
@@ -79,7 +79,7 @@
       <!-- VIDEO YOU FRIEND TAG HTML -->
       <video 
       bind:this={videoEl}
-      width="400" height="400" autoplay="true">
+      width="400" height="400" autoplay={true}>
         <track kind="captions" src="">
       </video>
       <br>
@@ -87,7 +87,7 @@
       <!-- YOU FACE CAM HERE -->
       <video 
       bind:this={videoCurrent}
-      width="400" height="400" autoplay="true">
+      width="400" height="400" autoplay={true}>
         <track kind="captions" src="">
       </video>
     </div>
