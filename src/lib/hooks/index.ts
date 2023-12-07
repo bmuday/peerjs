@@ -1,4 +1,4 @@
-import { coPeerId, myId, peer, videoCurrent, videoEl } from "$lib/stores";
+import { coPeerId, conn, myId, peer, videoCurrent, videoEl } from "$lib/stores";
 import { Peer } from "peerjs";
 import { get } from "svelte/store";
 
@@ -15,7 +15,7 @@ export const listenToEvents = (videoCurrent: HTMLMediaElement) => {
   });
 
   get(peer).on("connection", (connection) => {
-    console.log("message....");
+    conn.set(connection);
     connection.on("data", (data) => {
       console.log("new data " + data);
     });
@@ -30,7 +30,7 @@ export const listenToEvents = (videoCurrent: HTMLMediaElement) => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: true,
-        audio: true,
+        audio: false,
       });
 
       call.answer(stream);
@@ -55,7 +55,7 @@ export const connectToPeer = async () => {
   await navigator.mediaDevices
     .getUserMedia({
       video: true,
-      audio: true,
+      audio: false,
     })
     .then((stream) => {
       const call = get(peer).call(get(coPeerId), stream);

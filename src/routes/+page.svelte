@@ -2,13 +2,21 @@
 	import { connectToPeer, listenToEvents } from "$lib/hooks";
 	import { onMount } from "svelte";
 	import { writable, type Writable } from "svelte/store";
-  import { coPeerId, myId, videoCurrent, videoEl } from "$lib/stores";
+  import { coPeerId, myId, videoCurrent, videoEl, conn } from "$lib/stores";
 
+  const newMessage = writable("")
   const messages: Writable<string[]> = writable([])
+
+  $: console.log("connection", $conn)
 
     onMount(() => {
     listenToEvents()
     })
+
+    const sendMessage = () => {
+      console.log("new message", $newMessage)
+      $conn.send($newMessage)
+    }
     </script>
     <div>
       <p>Your peer id: {$myId}</p>
@@ -38,7 +46,7 @@
       </video>
 
       <form>
-        <input type="text" placeholder="Enter your new message">
+        <input bind:value={$newMessage} type="text" placeholder="Enter your new message">
         <button type="submit">Send</button>
       </form>
       <ul>
